@@ -1,8 +1,7 @@
 # Stock Scanner
 A UI python program to help track stock prices and show profits/losses based on number of shares owned and initial purchase price.
 
-The program continuously scraps the relevant yahoo finance page for the stock in question (providing the market is currently open otherwise it shows closing value) and displays it to the user
-in a simple UI layout. 
+The program continuously scrapes the relevant yahoo finance page for the stock in question (current price is displayed if market is open, otherwise the closing price is shown) and displays it to the user in a simple UI layout. 
 
 Please make sure you 'PAUSE' the software whilst entering in any data in the fields as the program will continously attempt to pull new information from the the internet unless this option is pressed. 
 
