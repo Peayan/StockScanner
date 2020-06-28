@@ -27,6 +27,7 @@ def download_ftse_tickers():
 def add_new_stock():
     """Adds an empty stock template to the list of tracked stocks"""
     add_new_stock_button.grid(row=(len(stock_list) + 4), column=4)
+    pause_frame.grid(row=len(stock_list) + 5)
     stock_list.append(StockItem(root, "", len(stock_list)+2, ftse_tickers))
 
 ######################################################################
@@ -67,16 +68,19 @@ def setup_header_names():
 
 def setup_buttons():
     """Creates the pause and default stock slot buttons"""
-    pause_text = Label(root, text="Pause", font=("Courier", 15))
-    pause_text.grid(row=10, column=6)
+    frame = Frame(root)
+    frame.grid(row=5, column=4)
+
+    pause_text = Label(frame, text="Paused", font=("Courier", 15))
+    pause_text.grid(row=0, column=0)
     paused_application = BooleanVar()
     paused_application.set(True)
-    paused_button = Checkbutton(variable=paused_application)
-    paused_button.grid(row=10, column=7)
+    paused_button = Checkbutton(frame, variable=paused_application)
+    paused_button.grid(row=0, column=1)
 
     add_new_stock_button = Button(root, pady=5, width=10, text="+", command=add_new_stock)
 
-    return add_new_stock_button, paused_application
+    return add_new_stock_button, paused_application, frame
 
 ######################################################################
 
@@ -194,11 +198,12 @@ ftse_tickers = download_ftse_tickers()
 
 root = Tk()
 root.title('Stock Info')
-root.geometry("1350x200")
+root.geometry("1225x200")
 
 stock_list = []
+
 setup_header_names()
-add_new_stock_button, paused_application = setup_buttons()
+add_new_stock_button, paused_application, pause_frame = setup_buttons()
 add_new_stock()
 
 menu = Menu(root)
@@ -208,11 +213,14 @@ menu.add_cascade(label='File', menu=filemenu)
 filemenu.add_command(label='New', command=new_file)
 filemenu.add_command(label='Open...', command=open_file)
 filemenu.add_command(label='Save...', command=save_file)
-filemenu.add_command(label='Export OHLC Graph', command=lambda:print("hi"))
 filemenu.add_separator()
 filemenu.add_command(label='Exit', command=root.quit)
 
-
-
 update_stock_prices()
 root.mainloop()
+
+def main():
+    print("This is main")
+
+if __name__ == "__main__":
+    main()
