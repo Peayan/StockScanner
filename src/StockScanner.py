@@ -4,11 +4,72 @@ import tkinter.filedialog
 import datetime
 import requests
 import time
+import lxml
 
-def add_new_stock():
+######################################################################
+
+def download_ftse_tickers():
+    FTSE_100 = "https://en.wikipedia.org/wiki/FTSE_100_Index"
+
+    ftse = requests.get(FTSE_100)
+    page = soup(ftse.text, 'lxml')
+
+    table = page.find('table', {'id': 'constituents'})
+    rows = table.find_all('tr')
+    ftse_tickers = []
+    for row in rows[1:]:
+        ftse_tickers.append(row.findAll('td')[1].text + ".L")
+
+    return ftse_tickers
+
+######################################################################
+
+def add_new_stock(ftse_tickers):
     """Adds an empty stock template to the list of tracked stocks"""
     add_new_stock_button.grid(row=(len(stock_list) + 4), column=4)
-    stock_list.append(StockItem(root, "", len(stock_list)+2))
+    stock_list.append(StockItem(root, "", len(stock_list)+2, ftse_tickers))
+
+######################################################################
+
+def setup_header_names():
+    """Use to create the tkinter header label tags for each column in the program"""
+    header_stock_name = Label(root, text="Stock", font=("Courier", 15))
+    header_stock_name.grid(row=0, column=0, padx=15)
+
+    header_market_open = Label(root, text="Market Open", font=("Courier", 15))
+    header_market_open.grid(row=0, column=1, padx=15)
+
+    header_stock_current_price = Label(root, text="Current Price", font=("Courier", 15))
+    header_stock_current_price.grid(row=0, column=2, padx=15)
+
+    header_stock_buy_in_price = Label(root, text="Buy In Price(£)", font=("Courier", 15))
+    header_stock_buy_in_price.grid(row=0, column=3, padx=15)
+
+    header_stock_num_shares = Label(root, text="# Shares", font=("Courier", 15))
+    header_stock_num_shares.grid(row=0, column=4, padx=15)
+
+    header_stock_bought_worth = Label(root, text="Bought Worth", font=("Courier", 15))
+    header_stock_bought_worth.grid(row=0, column=5, padx=15)
+
+    header_stock_current_worth = Label(root, text="Current Worth", font=("Courier", 15))
+    header_stock_current_worth.grid(row=0, column=6, padx=15)
+
+    header_profit_loss = Label(root, text="Profit/Loss", font=("Courier", 15))
+    header_profit_loss.grid(row=0, column=7, padx=15)
+
+######################################################################
+
+def setup_buttons(tickers):
+    """Creates the pause and default stock slot buttons"""
+    pause_text = Label(root, text="Pause", font=("Courier", 15))
+    pause_text.grid(row=10, column=6)
+    paused_application = BooleanVar()
+    paused_application.set(True)
+    paused_button = Checkbutton(variable=paused_application)
+    paused_button.grid(row=10, column=7)
+
+    add_new_stock_button = Button(root, pady=5, width=10, text="+", command=add_new_stock)
+    return add_new_stock_button, paused_application
 
 ######################################################################
 
@@ -69,6 +130,11 @@ def new_file():
 def check_if_markets_open(stock):
     """Uses timezones to determine whether the exchange the stock is sold on is currently open or closed"""
     current_time = datetime.datetime.now()
+
+    #return false if it's the weekend as markets are closed
+    if datetime.date.today().weekday() >= 5:
+        return False
+
     LSE_open = current_time.replace(hour=8, minute=0, second =0, microsecond=0)
     LSE_close = current_time.replace(hour=16, minute=30, second =0, microsecond=0)
     NYSE_open = current_time.replace(hour=14, minute=30, second=0, microsecond=0)
@@ -117,44 +183,16 @@ def update_stock_prices():
 
 ##################################################################
 
+tickers = download_ftse_tickers()
+
 root = Tk()
 root.title('Stock Info')
 root.geometry("1350x200")
 
 stock_list = []
-
-header_stock_name = Label(root, text="Stock", font=("Courier", 15))
-header_stock_name.grid(row = 0, column= 0, padx=15)
-
-header_market_open = Label(root, text="Market Open", font=("Courier", 15))
-header_market_open.grid(row = 0, column= 1, padx=15)
-
-header_stock_current_price = Label(root, text="Current Price", font=("Courier", 15))
-header_stock_current_price.grid(row = 0, column= 2, padx=15)
-
-header_stock_bought_price = Label(root, text="Bought Price", font=("Courier", 15))
-header_stock_bought_price.grid(row = 0, column= 3, padx=15)
-
-header_stock_quantity = Label(root, text="Quantity", font=("Courier", 15))
-header_stock_quantity.grid(row = 0, column= 4, padx=15)
-
-header_stock_bought_worth = Label(root, text="Bought Worth", font=("Courier", 15))
-header_stock_bought_worth.grid(row=0, column=5, padx=15)
-
-header_stock_current_worth = Label(root, text="Current Worth", font=("Courier", 15))
-header_stock_current_worth.grid(row=0, column=6, padx=15)
-
-header_profit_loss = Label(root, text="Profit/Loss", font=("Courier", 15))
-header_profit_loss.grid(row=0, column=7, padx=15)
-
-pause_text = Label(root, text="Pause", font=("Courier", 15))
-pause_text.grid(row=10, column=6)
-paused_application = BooleanVar()
-paused_button = Checkbutton(variable=paused_application)
-paused_button.grid(row=10, column=7)
-
-add_new_stock_button = Button(root, pady=5, width=10, text="+", command=add_new_stock)
-add_new_stock()
+setup_header_names()
+add_new_stock_button, paused_application = setup_buttons(tickers)
+add_new_stock(tickers)
 
 menu = Menu(root)
 root.config(menu=menu)

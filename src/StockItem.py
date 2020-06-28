@@ -2,13 +2,14 @@ from tkinter import *
 
 class StockItem:
     """UI object used to display stock data including name, current price, amount owed etc"""
-    def __init__(self, root, name, rowindex):
+    def __init__(self, root, name, rowindex, ftse_tickers):
         self.root = root
         rowindex += 1
 
         # stock name
         self.name = StringVar()
-        self.name_entry = Entry(self.root, textvariable=self.name)
+        self.name.set("III")
+        self.name_entry = OptionMenu(self.root, self.name, *ftse_tickers)
         self.name_entry.grid(row=rowindex, column=0)
 
         # market open
@@ -23,11 +24,11 @@ class StockItem:
         self.stock_price_text = Label(self.root, textvariable=self.price, font=("Courier", 20))
         self.stock_price_text.grid(row=rowindex, column=2)
 
-        # bought Price
-        self.bought_price = StringVar()
-        self.bought_price.set("0")
-        self.bought_price_entry = Entry(self.root, textvariable=self.bought_price)
-        self.bought_price_entry.grid(row=rowindex, column=3)
+        # Buy In Price
+        self.buy_in_price = StringVar()
+        self.buy_in_price.set("0")
+        self.buy_in_price_entry = Entry(self.root, textvariable=self.buy_in_price)
+        self.buy_in_price_entry.grid(row=rowindex, column=3)
 
         # quantity owned
         # 3.0898, 161
@@ -37,10 +38,10 @@ class StockItem:
         self.quantity_entry.grid(row=rowindex, column=4)
 
         #bought worth
-        self.bought_worth = StringVar()
-        self.bought_worth.set("0")
-        self.stock_bought_worth = Label(self.root, textvariable=self.bought_worth, font=("Courier", 15))
-        self.stock_bought_worth.grid(row=rowindex, column=5)
+        self.investment_worth = StringVar()
+        self.investment_worth.set("0")
+        self.stock_investment_worth = Label(self.root, textvariable=self.investment_worth, font=("Courier", 15))
+        self.stock_investment_worth.grid(row=rowindex, column=5)
 
         #current worth
         self.current_worth = StringVar()
@@ -76,21 +77,21 @@ class StockItem:
 
     def set_price(self, new_price):
         """Update all the relevant UI fields which rely on the pricing of the active stock"""
-        spent_total_worth = float(self.bought_price.get()) * float(self.quantity.get())
+        investment_total = float(self.quantity.get()) * float(self.buy_in_price.get())
         current_total_worth = float(self.quantity.get()) * float(new_price)
-        profit_loss = current_total_worth - spent_total_worth
+        profit_loss = current_total_worth - investment_total
 
         self.price.set("")
         self.price.set(float("{:.3f}".format(new_price)))
 
-        self.bought_worth.set("")
-        self.bought_worth.set(spent_total_worth)
+        self.investment_worth.set("")
+        self.investment_worth.set(investment_total)
 
         self.current_worth.set("")
         self.current_worth.set(float("{:.2f}".format(current_total_worth)))
 
         self.profit_loss.set("")
-        self.profit_loss.set(float("{:.2f}".format(current_total_worth - spent_total_worth)))
+        self.profit_loss.set(float("{:.2f}".format(current_total_worth - investment_total)))
         if(profit_loss < 0):
             self.stock_profit.configure(bg='red')
         elif profit_loss > 0:
@@ -108,7 +109,7 @@ class StockItem:
 
     def get_name(self):
         """Returns the name field of the stock object"""
-        return self.name_entry.get()
+        return self.name.get()
 
     def get_current_price(self):
         """Returns the price field of the stock object"""
