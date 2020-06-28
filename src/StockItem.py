@@ -1,9 +1,18 @@
 from tkinter import *
+from tkcalendar import *
+from StockGraphGenerator import *
+import datetime as dt
 
 class StockItem:
     """UI object used to display stock data including name, current price, amount owed etc"""
     def __init__(self, root, name, rowindex, ftse_tickers):
         self.root = root
+        self.start_date = dt.datetime.now()
+        self.end_date = dt.datetime.now()
+        self.start_date_text = StringVar(value="Select Start Date")
+        self.end_date_text = StringVar(value="Select End Date")
+
+        #indexer to help position new stock item on a new row
         rowindex += 1
 
         # stock name
@@ -31,7 +40,6 @@ class StockItem:
         self.buy_in_price_entry.grid(row=rowindex, column=3)
 
         # quantity owned
-        # 3.0898, 161
         self.quantity = StringVar()
         self.quantity.set("0")
         self.quantity_entry = Entry(self.root, textvariable=self.quantity)
@@ -55,13 +63,44 @@ class StockItem:
         self.stock_profit = Label(self.root, textvariable=self.profit_loss, font=("Courier", 15))
         self.stock_profit.grid(row=rowindex, column=7)
 
+        #Calender for OHLC
+        frame = Frame(self.root)
+        frame.grid(row=rowindex, column=8, sticky='nsew')
+
+        self.calendar_start_button = Button(frame, text="Select Date(s)", width=15, command=open_calendar)
+        self.calendar_start_button.pack()
+
+    def open_calendar():
+        """Allows user to select a date they'd like to use as the start point for their data collection"""
+        calendar_window = Tk()
+        calendar_window.title("OHLC Graph")
+        calendar_window.geometry("450x200")
+        today = dt.datetime.today()
+
+        calendar = Calendar(calendar_window, selectmode='day', year=today.year, month=today.month, day=today.day)
+        calendar.grid(row=0, column=0)
+
+        frame = Frame(calendar_window)
+        frame.grid(row=0, column=1, padx=50)
+
+        start_date_button = Button(frame, text="Start Date", width=15,
+                                   command=lambda: start_date_button.config(text=f"Start - {calendar.get_date()}"))
+        start_date_button.grid(row=0, column=0, pady=5)
+
+        end_date_button = Button(frame, text="End Date", width=15,
+                                 command=lambda: end_date_button.config(text=f"End - {calendar.get_date()}"))
+        end_date_button.grid(row=1, column=0)
+
+        make_graph_button = Button(frame, text="Export Graph...", width=15, command=make_OHLC_graph())
+        make_graph_button.grid(row=2, column=0, pady=30)
+
     def read_in_stock_data(self, data_list):
         """Applies the stock data read in from the open file function to the relevant ui variables"""
         if (len(data_list) != 3):
             print("Can't load stock data - insufficient values")
         else:
             self.name.set(data_list[0])
-            self.bought_price.set(data_list[1])
+            self.buy_in_price.set(data_list[1])
             self.quantity.set(data_list[2])
 
     def remove_grid(self):
@@ -69,9 +108,9 @@ class StockItem:
         self.name_entry.grid_remove()
         self.market_open_text.grid_remove()
         self.stock_price_text.grid_remove()
-        self.bought_price_entry.grid_remove()
+        self.buy_in_price_entry.grid_remove()
         self.quantity_entry.grid_remove()
-        self.stock_bought_worth.grid_remove()
+        self.stock_investment_worth.grid_remove()
         self.stock_current_worth.grid_remove()
         self.stock_profit.grid_remove()
 

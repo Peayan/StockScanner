@@ -24,7 +24,7 @@ def download_ftse_tickers():
 
 ######################################################################
 
-def add_new_stock(ftse_tickers):
+def add_new_stock():
     """Adds an empty stock template to the list of tracked stocks"""
     add_new_stock_button.grid(row=(len(stock_list) + 4), column=4)
     stock_list.append(StockItem(root, "", len(stock_list)+2, ftse_tickers))
@@ -33,33 +33,39 @@ def add_new_stock(ftse_tickers):
 
 def setup_header_names():
     """Use to create the tkinter header label tags for each column in the program"""
-    header_stock_name = Label(root, text="Stock", font=("Courier", 15))
-    header_stock_name.grid(row=0, column=0, padx=15)
+    xpadding = 5
+    divider = ''
 
-    header_market_open = Label(root, text="Market Open", font=("Courier", 15))
-    header_market_open.grid(row=0, column=1, padx=15)
+    header_stock_name = Label(root, text=f"Stock{divider}", font=("Courier", 15))
+    header_stock_name.grid(row=0, column=0, padx=xpadding)
 
-    header_stock_current_price = Label(root, text="Current Price", font=("Courier", 15))
-    header_stock_current_price.grid(row=0, column=2, padx=15)
+    header_market_open = Label(root, text=f"{divider}Market", font=("Courier", 15))
+    header_market_open.grid(row=0, column=1, padx=xpadding)
 
-    header_stock_buy_in_price = Label(root, text="Buy In Price(£)", font=("Courier", 15))
-    header_stock_buy_in_price.grid(row=0, column=3, padx=15)
+    header_stock_current_price = Label(root, text=f"{divider}Price", font=("Courier", 15))
+    header_stock_current_price.grid(row=0, column=2, padx=xpadding + 30)
 
-    header_stock_num_shares = Label(root, text="# Shares", font=("Courier", 15))
-    header_stock_num_shares.grid(row=0, column=4, padx=15)
+    header_stock_buy_in_price = Label(root, text=f"{divider}Buy In Price(£)", font=("Courier", 15))
+    header_stock_buy_in_price.grid(row=0, column=3, padx=xpadding)
 
-    header_stock_bought_worth = Label(root, text="Bought Worth", font=("Courier", 15))
-    header_stock_bought_worth.grid(row=0, column=5, padx=15)
+    header_stock_num_shares = Label(root, text=f"{divider}Shares Count", font=("Courier", 15))
+    header_stock_num_shares.grid(row=0, column=4, padx=xpadding)
 
-    header_stock_current_worth = Label(root, text="Current Worth", font=("Courier", 15))
-    header_stock_current_worth.grid(row=0, column=6, padx=15)
+    header_stock_bought_worth = Label(root, text=f"{divider}Invested", font=("Courier", 15))
+    header_stock_bought_worth.grid(row=0, column=5, padx=xpadding)
 
-    header_profit_loss = Label(root, text="Profit/Loss", font=("Courier", 15))
-    header_profit_loss.grid(row=0, column=7, padx=15)
+    header_stock_current_worth = Label(root, text=f"{divider}Sell Price", font=("Courier", 15))
+    header_stock_current_worth.grid(row=0, column=6, padx=xpadding)
+
+    header_profit_loss = Label(root, text=f"{divider}Profit/Loss", font=("Courier", 15))
+    header_profit_loss.grid(row=0, column=7, padx=xpadding)
+
+    header_calendar = Label(root, text=f"{divider}OHLC Graph", font=("Courier", 15))
+    header_calendar.grid(row=0, column=8, padx=xpadding)
 
 ######################################################################
 
-def setup_buttons(tickers):
+def setup_buttons():
     """Creates the pause and default stock slot buttons"""
     pause_text = Label(root, text="Pause", font=("Courier", 15))
     pause_text.grid(row=10, column=6)
@@ -69,6 +75,7 @@ def setup_buttons(tickers):
     paused_button.grid(row=10, column=7)
 
     add_new_stock_button = Button(root, pady=5, width=10, text="+", command=add_new_stock)
+
     return add_new_stock_button, paused_application
 
 ######################################################################
@@ -115,7 +122,7 @@ def save_file():
     file = open(dialogueWindow, "w+")
 
     for index, stock in enumerate(stock_list):
-        file.write(stock_list[index].name.get() + "," + stock_list[index].bought_price.get() + "," + stock_list[index].quantity.get() + "\n")
+        file.write(stock_list[index].name.get() + "," + stock_list[index].buy_in_price.get() + "," + stock_list[index].quantity.get() + "\n")
 
 ######################################################################
 
@@ -183,7 +190,7 @@ def update_stock_prices():
 
 ##################################################################
 
-tickers = download_ftse_tickers()
+ftse_tickers = download_ftse_tickers()
 
 root = Tk()
 root.title('Stock Info')
@@ -191,8 +198,8 @@ root.geometry("1350x200")
 
 stock_list = []
 setup_header_names()
-add_new_stock_button, paused_application = setup_buttons(tickers)
-add_new_stock(tickers)
+add_new_stock_button, paused_application = setup_buttons()
+add_new_stock()
 
 menu = Menu(root)
 root.config(menu=menu)
@@ -201,9 +208,11 @@ menu.add_cascade(label='File', menu=filemenu)
 filemenu.add_command(label='New', command=new_file)
 filemenu.add_command(label='Open...', command=open_file)
 filemenu.add_command(label='Save...', command=save_file)
+filemenu.add_command(label='Export OHLC Graph', command=lambda:print("hi"))
 filemenu.add_separator()
 filemenu.add_command(label='Exit', command=root.quit)
 
+
+
 update_stock_prices()
 root.mainloop()
-
